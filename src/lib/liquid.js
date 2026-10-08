@@ -287,12 +287,18 @@ export function createLiquid(host, isActive) {
 
   /* ----------------------------------------------------------------- sizing */
 
-  var scale = 0, cssW = 1, cssH = 1;
+  // Render at device resolution (capped at 2x) within a pixel budget, so the
+  // silk stays crisp on retina screens instead of being upscaled by the browser.
+  var PIXEL_BUDGET = 4.2e6;   // max drawing-buffer pixels
+  var MIN_SCALE = 0.75;       // never drop below 0.75 device px per CSS px
+  var scale = 0, maxScale = 1, cssW = 1, cssH = 1;
   function measure() {
     cssW = Math.max(1, canvas.clientWidth);
     cssH = Math.max(1, canvas.clientHeight);
     aspect = cssW / cssH;
-    if (!scale) scale = Math.min(1, Math.sqrt(1.6e6 / (cssW * cssH)));
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    maxScale = Math.max(MIN_SCALE, Math.min(dpr, Math.sqrt(PIXEL_BUDGET / (cssW * cssH))));
+    scale = scale ? Math.min(scale, maxScale) : maxScale;
     applyScale();
   }
   function applyScale() {
@@ -303,22 +309,30 @@ export function createLiquid(host, isActive) {
   measure();
   on(window, "resize", measure);
 
-  // adaptive quality: watch median frame time, step resolution down/up
-  var samples = [], budget = 1000 / 60, settled = 0, startedAt = 0;
+  // Adaptive quality: only step resolution down when the GPU is clearly
+  // struggling for several windows in a row, and recover once it keeps up.
+  var samples = [], refresh = 1000 / 60, refreshSeen = 0, slow = 0, settled = 0, startedAt = 0;
   function adapt(now, ft) {
     if (!startedAt) startedAt = now;
     if (ft < 3 || ft > 250) return;
     samples.push(ft);
-    if (samples.length < 40) return;
+    if (samples.length < 60) return;
     var sorted = samples.slice().sort(function (a, b) { return a - b; });
     samples.length = 0;
     var fast = sorted[Math.floor(sorted.length * 0.1)];
     var med = sorted[sorted.length >> 1];
-    if (fast < budget * 0.9) budget = Math.max(4, fast); // high-refresh display
-    if (now - startedAt < 1500) return;
-    if (med > budget * 1.35 && scale > 0.4) { scale = Math.max(0.4, scale * 0.85); applyScale(); settled = 0; }
-    else if (med < budget * 1.1 && scale < 1) { if (++settled >= 5) { settled = 0; scale = Math.min(1, scale * 1.08); applyScale(); } }
-    else settled = 0;
+    // a faster display refresh only counts once seen in two windows running
+    if (fast < refresh * 0.9) { if (refreshSeen && Math.abs(refreshSeen - fast) < fast * 0.1) refresh = Math.max(4, fast); refreshSeen = fast; }
+    else refreshSeen = 0;
+    if (now - startedAt < 2500) return;
+    // 1.6x the refresh, and under 30fps in absolute terms, before giving up detail
+    if (med > refresh * 1.6 && med > 30) {
+      settled = 0;
+      if (++slow >= 2 && scale > MIN_SCALE) { slow = 0; scale = Math.max(MIN_SCALE, scale * 0.9); applyScale(); }
+    } else {
+      slow = 0;
+      if (med < refresh * 1.15 && scale < maxScale && ++settled >= 3) { settled = 0; scale = Math.min(maxScale, scale * 1.1); applyScale(); }
+    }
   }
 
   function active() { return !document.hidden && (!isActive || isActive()); }

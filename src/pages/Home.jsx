@@ -30,23 +30,6 @@ const GLYPHS = {
   ),
 };
 
-function Probe() {
-  const [p, setP] = useState({ x: "0.500", y: "0.500" });
-  useEffect(() => {
-    const onMove = (e) =>
-      setP({ x: (e.clientX / window.innerWidth).toFixed(3), y: (1 - e.clientY / window.innerHeight).toFixed(3) });
-    window.addEventListener("pointermove", onMove, { passive: true });
-    return () => window.removeEventListener("pointermove", onMove);
-  }, []);
-  return (
-    <div className="hero__probe" aria-hidden="true">
-      25.2048° N · 55.2708° E<br />
-      Field X <b>{p.x}</b><br />
-      Field Y <b>{p.y}</b>
-    </div>
-  );
-}
-
 /* Words light up one by one as the block scrolls through the viewport. */
 const MANIFESTO = [
   ["We"], ["exist"], ["solely"], ["to"], ["protect"], ["owners"], ["and"], ["developers"], ["—"],
@@ -91,7 +74,6 @@ export default function Home() {
     <>
       <main id="main">
         <section className="hero" data-hero>
-          <Probe />
           <div className="wrap hero__body">
             <Label text="Independent Client-Side Advisors" box />
             <h1 className="hero__title">

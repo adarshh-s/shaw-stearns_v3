@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { ArrowUpRight, DubaiClock } from "./ui.jsx";
+import { ArrowUpRight } from "./ui.jsx";
 import { LogoMark, LogoWord } from "./Logo.jsx";
 import { NAV, CONTACT } from "../content.js";
 
@@ -47,10 +47,6 @@ export default function Nav() {
           </nav>
 
           <div className="nav__right">
-            <span className="nav__clock">
-              <i />
-              Dubai <DubaiClock />
-            </span>
             <Link to="/contact" className="btn btn--sm">
               Enquire <ArrowUpRight />
             </Link>

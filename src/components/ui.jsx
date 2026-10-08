@@ -111,25 +111,6 @@ export function Cell({ as: Tag = "div", className = "", children, ...rest }) {
   );
 }
 
-/* --------------------------------------------------------------- clock */
-
-let fmt;
-try {
-  fmt = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Dubai", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
-} catch {
-  fmt = null;
-}
-
-export function DubaiClock() {
-  const [now, setNow] = useState(() => (fmt ? fmt.format(new Date()) : ""));
-  useEffect(() => {
-    if (!fmt) return;
-    const id = setInterval(() => setNow(fmt.format(new Date())), 1000);
-    return () => clearInterval(id);
-  }, []);
-  return <b>{now}</b>;
-}
-
 /* ---------------------------------------------------------------- tabs */
 
 /**

@@ -189,13 +189,6 @@ main, .site-footer { position: relative; z-index: 2; }
 .nav__links a[aria-current="page"]::after { transform: scaleX(1); background: var(--accent); }
 
 .nav__right { display: flex; align-items: center; gap: 18px; }
-.nav__clock {
-  font: 400 10px/1 var(--mono); letter-spacing: .18em; text-transform: uppercase; color: var(--ink-3);
-  white-space: nowrap;
-}
-.nav__clock b { color: var(--ink-2); font-weight: 400; }
-.nav__clock i { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); margin-right: 8px; vertical-align: 1px; animation: pulse 2.4s infinite; font-style: normal; }
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
 
 .nav__burger { display: none; width: 44px; height: 44px; align-items: center; justify-content: center; }
 .nav__burger span { position: relative; display: block; width: 20px; height: 1px; background: #fff; transition: background .3s; }
@@ -739,7 +732,6 @@ a.cell:hover .cell__foot svg { transform: translate(3px, -3px); color: var(--acc
    -------------------------------------------------------------------------- */
 
 @media (max-width: 1024px) {
-  .nav__clock { display: none; }
   .cells--5 { grid-template-columns: repeat(3, 1fr); }
   .method__panel { grid-template-columns: 1fr 1fr; }
   .method__panel > *:first-child { grid-column: 1 / -1; display: flex; align-items: flex-end; gap: 24px; border-bottom: 1px solid var(--line-2); }
